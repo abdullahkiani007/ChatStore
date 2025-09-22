@@ -1,3 +1,4 @@
 node_modules
 dist/
-ChatStore.zip
+
+*.zip

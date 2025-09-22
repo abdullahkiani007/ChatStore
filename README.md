@@ -1,6 +1,6 @@
 # Chat Store Extension
 
-**Chat Store** is a browser extension that allows users to save, search, and manage their favorite chats from web applications. It provides a smooth UI panel for accessing saved chats, supports infinite scrolling, and is designed to work across modern browsers.
+**Chat Store** is a browser extension that allows users to save, search, and manage their favorite chats from ChatGpt. It provides a smooth UI panel for accessing saved chats, supports infinite scrolling, and is designed to work across modern browsers.
 
 ---
 

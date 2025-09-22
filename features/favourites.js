@@ -1,15 +1,16 @@
-// features/favourites.js
 import { state } from "../core/state.js";
-import { getFavorites, setFavorites } from "../core/storage.js";
+import { getFavorites, saveFavorites } from "../core/storage.js"; // use correct function
 
 export async function loadFavorites(reset = true) {
+  console.log("loading favourite...");
   const favorites = await getFavorites();
+  console.log("favourites...", favorites);
   if (reset) {
     state.allFavorites = favorites;
     state.renderedCount = 0;
     applySearchFilter("");
   }
-  return nextBatch();
+  // return nextBatch();
 }
 
 export function applySearchFilter(term) {
@@ -35,7 +36,7 @@ export async function saveCurrentChat(title, url) {
   const favorites = await getFavorites();
   if (!favorites.some((f) => f.url === url)) {
     favorites.push({ title, url });
-    await setFavorites(favorites);
+    await saveFavorites(favorites);
     return true;
   }
   return false;
@@ -43,5 +44,5 @@ export async function saveCurrentChat(title, url) {
 
 export async function removeFavorite(idx) {
   state.allFavorites.splice(idx, 1);
-  await setFavorites(state.allFavorites);
+  await saveFavorites(state.allFavorites);
 }

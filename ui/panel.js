@@ -12,6 +12,7 @@ import { getTheme } from "./theme.js";
 import { showToast } from "./toast.js";
 
 export function initPanel() {
+  console.log("Initializing panel....");
   const theme = getTheme();
 
   const logo = createEl("button", {
@@ -46,8 +47,9 @@ export function initPanel() {
       borderRadius: "16px",
       padding: "16px",
       overflowY: "auto",
+      backdropFilter: "blur(10px)",
       display: "none",
-      opacity: "0",
+      opacity: "1",
       transform: "translateY(20px)",
       transition: "opacity 0.25s ease, transform 0.25s ease",
       zIndex: "2147483647",
@@ -79,18 +81,31 @@ export function initPanel() {
   header.appendChild(closeBtn);
 
   const saveBtn = createEl("button", {
-    text: "Save This Chat",
+    text: "💾 Save Chat",
     style: {
-      border: `1px solid ${theme.panelBorder}`,
-      background: "transparent",
+      border: "none",
+      background: "#1E1E22", // professional blue accent
+      color: "#fff",
       borderRadius: "8px",
-      padding: "6px 12px",
+      padding: "8px 16px",
       marginRight: "8px",
       cursor: "pointer",
-      fontSize: "13px",
-      color: theme.text,
+      fontSize: "14px",
+      fontWeight: "600",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.2)", // subtle elevation
+      transition: "all 0.15s ease",
     },
   });
+
+  saveBtn.onmouseenter = () => {
+    saveBtn.style.transform = "translateY(-1px)"; // slight lift
+    saveBtn.style.boxShadow = "0 4px 8px rgba(0,0,0,0.25)";
+  };
+  saveBtn.onmouseleave = () => {
+    saveBtn.style.transform = "translateY(0)";
+    saveBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+  };
+
   saveBtn.onclick = async () => {
     const saved = await saveCurrentChat(
       document.title.replace(/\s*\|.*$/, ""),
@@ -136,6 +151,7 @@ export function initPanel() {
   document.body.append(logo, panel);
 
   async function refresh() {
+    console.log("refresh is beign fired...");
     await loadFavorites(true);
     renderList(true);
   }
@@ -162,6 +178,13 @@ export function initPanel() {
         gap: "8px",
       },
     });
+    li.onmouseenter = () => {
+      li.style.background = "rgba(0,0,0,0.1)"; // or any subtle highlight
+    };
+    li.onmouseleave = () => {
+      li.style.background = "transparent";
+    };
+
     const link = createEl("a", {
       text: f.title || f.url,
       attrs: {
@@ -181,26 +204,39 @@ export function initPanel() {
     const removeBtn = createEl("button", {
       text: "Remove",
       style: {
-        width: "70px",
+        minWidth: "70px", // minimum width for consistency
+        flexShrink: "0", // don't shrink
         border: `1px solid ${theme.panelBorder}`,
         background: "transparent",
         color: "crimson",
         borderRadius: "6px",
-        padding: "4px 0",
+        padding: "4px 8px", // add horizontal padding
         fontSize: "12px",
         cursor: "pointer",
+        textAlign: "center", // ensures text is centered
       },
     });
+
     removeBtn.onclick = async (e) => {
       e.stopPropagation();
       await removeFavorite(idx);
       await refresh();
     };
+    removeBtn.onmouseenter = () => {
+      removeBtn.style.background = "crimson";
+      removeBtn.style.color = "white";
+    };
+    removeBtn.onmouseleave = () => {
+      removeBtn.style.background = "transparent";
+      removeBtn.style.color = "crimson";
+    };
+
     li.append(link, removeBtn);
     return li;
   }
 
   function show() {
+    console.log("show is beign fired.....");
     refresh();
     panel.style.display = "block";
     requestAnimationFrame(() => {

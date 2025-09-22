@@ -10,11 +10,23 @@ import {
 import { createEl, clearEl } from "./dom.js";
 import { getTheme } from "./theme.js";
 import { showToast } from "./toast.js";
+const deleteIcon = browser.runtime.getURL("icons/delete.png");
+
+function debounce(cb, wait = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      cb(...args);
+    }, wait);
+  };
+}
 
 export function initPanel() {
   console.log("Initializing panel....");
   const theme = getTheme();
 
+  // logo
   const logo = createEl("button", {
     id: "fav-extension-logo",
     text: "★",
@@ -34,6 +46,7 @@ export function initPanel() {
     },
   });
 
+  // panel
   const panel = createEl("div", {
     id: "fav-extension-panel",
     style: {
@@ -57,6 +70,7 @@ export function initPanel() {
     },
   });
 
+  // header
   const header = createEl("div", {
     text: "Saved Chats",
     style: {
@@ -67,6 +81,8 @@ export function initPanel() {
       fontWeight: "600",
     },
   });
+
+  // close button
   const closeBtn = createEl("button", {
     text: "✕",
     style: {
@@ -80,6 +96,7 @@ export function initPanel() {
   closeBtn.onclick = hide;
   header.appendChild(closeBtn);
 
+  // save button
   const saveBtn = createEl("button", {
     text: "💾 Save Chat",
     style: {
@@ -116,6 +133,7 @@ export function initPanel() {
   };
   header.insertBefore(saveBtn, closeBtn);
 
+  // search box
   const searchBox = createEl("input", {
     attrs: { type: "search", placeholder: "Search by title…" },
     style: {
@@ -130,13 +148,19 @@ export function initPanel() {
     },
   });
   searchBox.oninput = async () => {
+    debounceSearch();
+  };
+  const debounceSearch = debounce(() => {
     applySearchFilter(searchBox.value);
     renderList(true);
-  };
+  }, 300);
 
+  // chat list
   const list = createEl("ul", {
     style: { listStyle: "none", padding: "0", margin: "0" },
   });
+
+  // footer
   const footer = createEl("div", {
     text: "Click a chat to open it in a new tab.",
     style: {
@@ -162,7 +186,6 @@ export function initPanel() {
     for (let i = batch.length - 1; i >= 0; i--) {
       const f = batch[i];
       const idx = state.renderedCount - batch.length + i;
-      console.log("rendering list");
       list.appendChild(renderItem(f, idx));
     }
   }
@@ -173,7 +196,8 @@ export function initPanel() {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "6px 0",
+        padding: "6px 6px",
+        borderRadius: "6px",
         borderBottom: `1px solid ${theme.panelBorder}`,
         gap: "8px",
       },
@@ -191,47 +215,52 @@ export function initPanel() {
         href: f.url,
         target: "_blank",
         rel: "noopener noreferrer",
+        title: f.title || f.url, // <-- shows full text on hover
       },
       style: {
         color: theme.text,
         textDecoration: "none",
+        fontSize: "small",
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
-        flex: "1 1 auto",
-      },
-    });
-    const removeBtn = createEl("button", {
-      text: "Remove",
-      style: {
-        minWidth: "70px", // minimum width for consistency
-        flexShrink: "0", // don't shrink
-        border: `1px solid ${theme.panelBorder}`,
-        background: "transparent",
-        color: "crimson",
-        borderRadius: "6px",
-        padding: "4px 8px", // add horizontal padding
-        fontSize: "12px",
-        cursor: "pointer",
-        textAlign: "center", // ensures text is centered
+        flex: "1 1 0",
+        minWidth: "0",
       },
     });
 
-    removeBtn.onclick = async (e) => {
+    const deleteBtn = createEl("img", {
+      attrs: {
+        src: deleteIcon,
+        alt: "Delete",
+        title: "Remove chat",
+      },
+      style: {
+        width: "20px",
+        height: "20px",
+        cursor: "pointer",
+        flexShrink: "0",
+        display: "block",
+        margin: "0 auto",
+        transition: "transform 0.15s ease",
+      },
+    });
+
+    // Scale icon on hover
+    deleteBtn.onmouseenter = () => {
+      deleteBtn.style.transform = "scale(1.3)";
+    };
+    deleteBtn.onmouseleave = () => {
+      deleteBtn.style.transform = "scale(1)";
+    };
+
+    deleteBtn.onclick = async (e) => {
       e.stopPropagation();
       await removeFavorite(idx);
       await refresh();
     };
-    removeBtn.onmouseenter = () => {
-      removeBtn.style.background = "crimson";
-      removeBtn.style.color = "white";
-    };
-    removeBtn.onmouseleave = () => {
-      removeBtn.style.background = "transparent";
-      removeBtn.style.color = "crimson";
-    };
 
-    li.append(link, removeBtn);
+    li.append(link, deleteBtn);
     return li;
   }
 

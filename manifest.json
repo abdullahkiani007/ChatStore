@@ -8,6 +8,9 @@
     "default_popup": "popup.html"
   },
   "permissions": ["storage", "tabs"],
+  "web_accessible_resources": [
+"icons/delete.png"    
+],
   "content_scripts": [
     {
       "matches": ["*://chatgpt.com/*", "*://chat.openai.com/*"],

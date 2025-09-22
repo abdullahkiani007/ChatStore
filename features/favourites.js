@@ -1,5 +1,5 @@
 import { state } from "../core/state.js";
-import { getFavorites, saveFavorites } from "../core/storage.js"; // use correct function
+import { getFavorites, saveFavorites } from "../core/storage.js";
 
 export async function loadFavorites(reset = true) {
   console.log("loading favourite...");

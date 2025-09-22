@@ -2,7 +2,6 @@ import { state } from "../core/state.js";
 import { getFavorites, saveFavorites } from "../core/storage.js";
 
 export async function loadFavorites(reset = true) {
-  console.log("loading favourite...");
   const favorites = await getFavorites();
   if (reset) {
     state.allFavorites = favorites;

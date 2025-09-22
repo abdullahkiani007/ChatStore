@@ -7,6 +7,5 @@ export async function getFavorites() {
 }
 
 export async function saveFavorites(favs) {
-  console.log("type of browser is ", typeof _browser);
   return _browser.storage.local.set({ favorites: favs });
 }

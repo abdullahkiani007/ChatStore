@@ -27,7 +27,6 @@ function debounce(cb, wait = 300) {
 }
 
 export function initPanel() {
-  console.log("Initializing panel....");
   const theme = getTheme();
 
   // logo
@@ -179,7 +178,6 @@ export function initPanel() {
   document.body.append(logo, panel);
 
   async function refresh() {
-    console.log("refresh is beign fired...");
     await loadFavorites(true);
     renderList(true);
   }
@@ -269,7 +267,6 @@ export function initPanel() {
   }
 
   function show() {
-    console.log("show is beign fired.....");
     refresh();
     panel.style.display = "block";
     requestAnimationFrame(() => {

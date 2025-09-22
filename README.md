@@ -19,17 +19,20 @@
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/chat-store.git
-cd chat-store
+git clone https://github.com/abdullahkiani007/ChatStore.git
+cd ChatStore
+npm install
+npm run build
 ```
 2. Load as an unpacked extension in your browser:
+   - For development, use the `dist/` folder created by the build step.
    - Chrome/Edge: chrome://extensions/ → “Load unpacked”
    - Firefox: about:debugging → “This Firefox” → “Load Temporary Add-on”
 
 
 ## Project Structure
 ```bash
-chat-store/
+ChatStore/
 ├─ content.js          # Entry point for the extension
 ├─ ui/
 │  ├─ panel.js         # Panel UI logic

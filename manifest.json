@@ -4,8 +4,7 @@
   "version": "1.0",
   "description": "Save and open your favorite chat links quickly.",
   "action": {
-    "default_icon": {"16":"icons/icon.png"},
-    "default_popup": "popup.html"
+    "default_icon": {"16":"icons/icon.png"}
   },
   "permissions": ["storage", "tabs"],
   "host_permissions": [
@@ -18,6 +17,13 @@
       "matches": ["<all_urls>"]
     }
   ],
+  "browser_specific_settings": {
+  "gecko": {
+    "id": "chatstore@abdullah.com",
+    "strict_min_version": "109.0"
+  }
+}
+,
   "content_scripts": [
     {
       "matches": ["*://chatgpt.com/*", "*://chat.openai.com/*"],

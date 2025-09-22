@@ -1,5 +1,8 @@
-browser.runtime.onMessage.addListener((msg) => {
+const _browser =
+  typeof globalThis.browser !== "undefined" ? globalThis.browser : chrome;
+
+_browser.runtime.onMessage.addListener((msg) => {
   if (msg.action === "openPopup") {
-    browser.tabs.create({ url: browser.runtime.getURL("popup.html") });
+    _browser.tabs.create({ url: _browser.runtime.getURL("popup.html") });
   }
 });

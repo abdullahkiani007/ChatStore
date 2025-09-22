@@ -10,7 +10,11 @@ import {
 import { createEl, clearEl } from "./dom.js";
 import { getTheme } from "./theme.js";
 import { showToast } from "./toast.js";
-const deleteIcon = browser.runtime.getURL("icons/delete.png");
+
+const _browser =
+  typeof globalThis.browser !== "undefined" ? globalThis.browser : chrome;
+
+import deleteIcon from "@/icons/delete.png";
 
 function debounce(cb, wait = 300) {
   let timer;
@@ -236,8 +240,8 @@ export function initPanel() {
         title: "Remove chat",
       },
       style: {
-        width: "20px",
-        height: "20px",
+        width: "17px",
+        height: "17px",
         cursor: "pointer",
         flexShrink: "0",
         display: "block",

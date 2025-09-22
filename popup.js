@@ -1,3 +1,6 @@
+const _browser =
+  typeof globalThis.browser !== "undefined" ? globalThis.browser : chrome;
+
 document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("favList");
   const saveBtn = document.getElementById("saveBtn");
@@ -7,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let filtered = [];
 
   async function loadFavorites() {
-    const { favorites = [] } = await browser.storage.local.get("favorites");
+    const { favorites = [] } = await _browser.storage.local.get("favorites");
     // newest first
     allFavorites = [...favorites].reverse();
     applyFilter();
@@ -41,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const idx = allFavorites.findIndex((f) => f.url === fav.url);
         if (idx > -1) {
           allFavorites.splice(idx, 1);
-          await browser.storage.local.set({
+          await _browser.storage.local.set({
             favorites: [...allFavorites].reverse(),
           }); // store oldest-first
           applyFilter();
@@ -55,14 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   saveBtn.addEventListener("click", async () => {
-    const [tab] = await browser.tabs.query({
+    const [tab] = await _browser.tabs.query({
       active: true,
       currentWindow: true,
     });
-    const { favorites = [] } = await browser.storage.local.get("favorites");
+    const { favorites = [] } = await _browser.storage.local.get("favorites");
     if (!favorites.some((f) => f.url === tab.url)) {
       favorites.push({ title: tab.title, url: tab.url });
-      await browser.storage.local.set({ favorites });
+      await _browser.storage.local.set({ favorites });
       await loadFavorites();
     }
   });

@@ -1,0 +1,26 @@
+{
+  "name": "chatstore",
+  "version": "1.0.0",
+  "description": "**Chat Store** is a browser extension that allows users to save, search, and manage their favorite chats from web applications. It provides a smooth UI panel for accessing saved chats, supports infinite scrolling, and is designed to work across modern browsers.",
+  "main": "content.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build",
+    "dev":"vite"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullahkiani007/ChatStore.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abdullahkiani007/ChatStore/issues"
+  },
+  "homepage": "https://github.com/abdullahkiani007/ChatStore#readme",
+  "dependencies": {
+    "vite": "^7.1.7",
+    "vite-plugin-web-extension": "^4.4.5"
+  }
+}

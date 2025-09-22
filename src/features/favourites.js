@@ -4,7 +4,6 @@ import { getFavorites, saveFavorites } from "../core/storage.js";
 export async function loadFavorites(reset = true) {
   console.log("loading favourite...");
   const favorites = await getFavorites();
-  console.log("favourites...", favorites);
   if (reset) {
     state.allFavorites = favorites;
     state.renderedCount = 0;

@@ -1,16 +1,23 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Chat Store",
   "version": "1.0",
   "description": "Save and open your favorite chat links quickly.",
-  "browser_action": {
-    "default_icon": "icons/icon.png",
+  "action": {
+    "default_icon": {"16":"icons/icon.png"},
     "default_popup": "popup.html"
   },
   "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "*://chatgpt.com/*",
+    "*://chat.openai.com/*"
+  ],
   "web_accessible_resources": [
-"icons/delete.png"    
-],
+    {
+      "resources": ["icons/delete.png", "ui/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": ["*://chatgpt.com/*", "*://chat.openai.com/*"],

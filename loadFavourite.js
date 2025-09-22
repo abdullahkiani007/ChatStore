@@ -1,5 +1,8 @@
+const _browser =
+  typeof globalThis.browser !== "undefined" ? globalThis.browser : chrome;
+
 export async function loadFavorites(reset = true) {
-  const { favorites = [] } = await browser.storage.local.get("favorites");
+  const { favorites = [] } = await _browser.storage.local.get("favorites");
   if (reset) {
     allFavorites = favorites;
     renderedCount = 0;
@@ -93,7 +96,7 @@ function renderItem(f, idx) {
   remove.addEventListener("click", async (e) => {
     e.stopPropagation();
     allFavorites.splice(idx, 1);
-    await browser.storage.local.set({ favorites: allFavorites });
+    await _browser.storage.local.set({ favorites: allFavorites });
     await loadFavorites(true); // reload from scratch to update DOM
   });
 

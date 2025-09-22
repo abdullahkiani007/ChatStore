@@ -8,11 +8,10 @@
 
 - **Save Chats**: Store the current chat with a single click.
 - **Search**: Quickly filter chats by title or URL.
-- **Infinite Scroll**: Efficiently renders large numbers of chats.
+- **Lazy Loading**: Efficiently renders chats in batches as you scroll.
 - **Remove Favorites**: Delete saved chats from the panel.
 - **Responsive UI**: Works in both light and dark themes.
-- **Cross-Browser**: Compatible with Chrome, Firefox, and Edge.
-
+- **Cross-Browser**: Designed to be browser-agnostic. Currently, it works in Firefox; Chrome support may require minor adjustments due to differences in WebExtension APIs.
 ---
 
 ## Installation

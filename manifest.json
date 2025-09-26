@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Save and open your favorite chat links quickly.",
   "action": {
-    "default_icon": {"16":"icons/icon.png"}
+    "default_icon": {"16":"icon.png"}
   },
   "permissions": ["storage", "tabs"],
   "host_permissions": [
@@ -13,7 +13,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["icons/delete.png", "ui/*"],
+      "resources": ["delete.png", "ui/*"],
       "matches": ["<all_urls>"]
     }
   ],

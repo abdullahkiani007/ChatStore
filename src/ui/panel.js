@@ -16,20 +16,18 @@ const _browser =
 
 import deleteIcon from "@/icons/delete.png";
 
-function debounce(cb, wait = 300) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      cb(...args);
-    }, wait);
-  };
-}
-
 export function initPanel() {
   const theme = getTheme();
 
-  // logo
+  function debounce(cb, wait = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => cb(...args), wait);
+    };
+  }
+
+  // floating logo toggle
   const logo = createEl("button", {
     id: "fav-extension-logo",
     text: "★",
@@ -49,33 +47,44 @@ export function initPanel() {
     },
   });
 
-  // panel
+  // main panel
   const panel = createEl("div", {
     id: "fav-extension-panel",
     style: {
       position: "fixed",
       bottom: "80px",
       right: "20px",
-      width: "320px",
+      width: "min(90vw, 320px)",
       maxHeight: "420px",
       background: theme.panelBg,
       border: `1px solid ${theme.panelBorder}`,
       borderRadius: "16px",
-      padding: "16px",
-      overflowY: "auto",
-      backdropFilter: "blur(10px)",
+      overflow: "hidden",
       display: "none",
-      opacity: "1",
+      opacity: "0",
       transform: "translateY(20px)",
-      transition: "opacity 0.25s ease, transform 0.25s ease",
+      transition: "opacity 0.35s ease, transform 0.35s ease",
       zIndex: "2147483647",
       color: theme.text,
+      backdropFilter: "blur(10px)",
+      flexDirection: "column", // Moved from inline style
     },
   });
 
-  // header
-  const header = createEl("div", {
-    text: "Saved Chats",
+  // sticky header + search container
+  const topBar = createEl("div", {
+    style: {
+      position: "sticky",
+      top: "0",
+      background: theme.panelBg,
+      padding: "12px 16px",
+      borderBottom: `1px solid ${theme.panelBorder}`,
+      zIndex: "1",
+      flexShrink: "0", // Prevent shrinking
+    },
+  });
+
+  const headerRow = createEl("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -85,7 +94,7 @@ export function initPanel() {
     },
   });
 
-  // close button
+  const title = createEl("div", { text: "Saved Chats" });
   const closeBtn = createEl("button", {
     text: "✕",
     style: {
@@ -97,33 +106,40 @@ export function initPanel() {
     },
   });
   closeBtn.onclick = hide;
-  header.appendChild(closeBtn);
+  headerRow.append(title, closeBtn);
 
-  // save button
-  const saveBtn = createEl("button", {
-    text: "💾 Save Chat",
+  // Save button in its own container below header
+  const saveContainer = createEl("div", {
     style: {
-      border: "none",
-      background: "#1E1E22", // professional blue accent
-      color: "#fff",
-      borderRadius: "8px",
-      padding: "8px 16px",
-      marginRight: "8px",
-      cursor: "pointer",
-      fontSize: "14px",
-      fontWeight: "600",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.2)", // subtle elevation
-      transition: "all 0.15s ease",
+      display: "flex",
+      justifyContent: "center",
+      marginBottom: "12px",
     },
   });
 
+  const saveBtn = createEl("button", {
+    text: "＋ Save Current Chat",
+    style: {
+      border: `1px solid ${theme.panelBorder}`,
+      background: theme.panelBg,
+      color: theme.text,
+      cursor: "pointer",
+      fontSize: "13px",
+      fontWeight: "600",
+      padding: "8px 16px",
+      borderRadius: "8px",
+      width: "90%",
+      transition: "background 0.2s",
+    },
+    attrs: { title: "Save current chat" },
+  });
+
+  // Add hover effect properly
   saveBtn.onmouseenter = () => {
-    saveBtn.style.transform = "translateY(-1px)"; // slight lift
-    saveBtn.style.boxShadow = "0 4px 8px rgba(0,0,0,0.25)";
+    saveBtn.style.background = theme.hoverBg;
   };
   saveBtn.onmouseleave = () => {
-    saveBtn.style.transform = "translateY(0)";
-    saveBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+    saveBtn.style.background = theme.panelBg;
   };
 
   saveBtn.onclick = async () => {
@@ -131,17 +147,18 @@ export function initPanel() {
       document.title.replace(/\s*\|.*$/, ""),
       location.href
     );
-    showToast(saved ? "Chat saved!" : "Already saved");
+    await loadFavorites(true);
+    updateSaveButton();
+    showToast("Chat saved!");
     await refresh();
   };
-  header.insertBefore(saveBtn, closeBtn);
 
-  // search box
+  saveContainer.appendChild(saveBtn);
+
   const searchBox = createEl("input", {
     attrs: { type: "search", placeholder: "Search by title…" },
     style: {
       width: "100%",
-      marginBottom: "8px",
       padding: "6px 8px",
       border: `1px solid ${theme.panelBorder}`,
       borderRadius: "8px",
@@ -150,41 +167,91 @@ export function initPanel() {
       fontSize: "14px",
     },
   });
-  searchBox.oninput = async () => {
-    debounceSearch();
-  };
-  const debounceSearch = debounce(() => {
-    applySearchFilter(searchBox.value);
-    renderList(true);
-  }, 300);
 
-  // chat list
   const list = createEl("ul", {
-    style: { listStyle: "none", padding: "0", margin: "0" },
-  });
-
-  // footer
-  const footer = createEl("div", {
-    text: "Click a chat to open it in a new tab.",
     style: {
-      marginTop: "12px",
-      fontSize: "12px",
-      opacity: "0.7",
-      textAlign: "center",
+      listStyle: "none",
+      padding: "0",
+      margin: "0",
+      overflowY: "auto",
+      flex: "1 1 auto",
+      maxHeight: "none", // Let parent control height
     },
   });
 
-  panel.append(header, searchBox, list, footer);
+  const noResults = createEl("div", {
+    text: "No saved chats found.",
+    style: {
+      padding: "16px",
+      textAlign: "center",
+      fontSize: "13px",
+      opacity: "0.7",
+      display: "none",
+    },
+  });
+
+  const footer = createEl("div", {
+    text: "Click a chat to open it in a new tab.",
+    style: {
+      padding: "8px",
+      fontSize: "12px",
+      opacity: "0.7",
+      textAlign: "center",
+      borderTop: `1px solid ${theme.panelBorder}`,
+      flexShrink: "0", // Prevent shrinking
+    },
+  });
+
+  topBar.append(headerRow, saveContainer, searchBox);
+  panel.append(topBar, list, noResults, footer);
   document.body.append(logo, panel);
+
+  // --- logic functions ---
+  function updateSaveButton() {
+    const exists = state.filteredFavorites?.some(
+      (f) => f.url === location.href
+    );
+    if (exists) {
+      saveBtn.textContent = "✓ Saved";
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = "0.6";
+      saveBtn.title = "This chat is already saved";
+    } else {
+      saveBtn.textContent = "＋ Save Chat";
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = "1";
+      saveBtn.title = "Save current chat";
+    }
+  }
+
+  const doSearch = debounce(() => {
+    applySearchFilter(searchBox.value);
+    renderList(true);
+  }, 250);
+  searchBox.oninput = doSearch;
 
   async function refresh() {
     await loadFavorites(true);
+    updateSaveButton();
     renderList(true);
   }
 
   function renderList(reset = false) {
-    if (reset) clearEl(list);
+    if (reset) {
+      clearEl(list);
+      state.renderedCount = 0; // Reset the counter
+    }
+
     const batch = nextBatch();
+
+    if (state.filteredFavorites.length === 0) {
+      noResults.style.display = "block";
+      list.style.display = "none";
+    } else {
+      noResults.style.display = "none";
+      list.style.display = "block";
+    }
+
     for (let i = batch.length - 1; i >= 0; i--) {
       const f = batch[i];
       const idx = state.renderedCount - batch.length + i;
@@ -195,21 +262,29 @@ export function initPanel() {
   function renderItem(f, idx) {
     const li = createEl("li", {
       style: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "6px 6px",
-        borderRadius: "6px",
+        padding: "8px 12px",
         borderBottom: `1px solid ${theme.panelBorder}`,
-        gap: "8px",
+        cursor: "pointer",
+        transition: "background 0.2s",
       },
     });
+
+    // Add hover effect
     li.onmouseenter = () => {
-      li.style.background = "rgba(0,0,0,0.1)"; // or any subtle highlight
+      li.style.background = "rgba(0,0,0,0.05)";
     };
     li.onmouseleave = () => {
       li.style.background = "transparent";
     };
+
+    const titleRow = createEl("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "4px",
+      },
+    });
 
     const link = createEl("a", {
       text: f.title || f.url,
@@ -217,87 +292,125 @@ export function initPanel() {
         href: f.url,
         target: "_blank",
         rel: "noopener noreferrer",
-        title: f.title || f.url, // <-- shows full text on hover
+        title: f.title || f.url, // Show full title on hover
       },
       style: {
         color: theme.text,
         textDecoration: "none",
-        fontSize: "small",
+        flex: "1",
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
-        flex: "1 1 0",
-        minWidth: "0",
+        fontSize: "14px",
       },
     });
 
-    const deleteBtn = createEl("img", {
-      attrs: {
-        src: deleteIcon,
-        alt: "Delete",
-        title: "Remove chat",
-      },
+    const deleteBtn = createEl("button", {
+      text: "🗑",
       style: {
-        width: "17px",
-        height: "17px",
+        marginLeft: "8px",
+        background: "transparent",
+        border: "none",
         cursor: "pointer",
+        fontSize: "14px",
+        color: theme.text,
         flexShrink: "0",
-        display: "block",
-        margin: "0 auto",
-        transition: "transform 0.15s ease",
+        padding: "4px",
+        borderRadius: "4px",
+        transition: "background 0.2s",
       },
     });
 
-    // Scale icon on hover
+    // Delete button hover effect
     deleteBtn.onmouseenter = () => {
-      deleteBtn.style.transform = "scale(1.3)";
+      deleteBtn.style.background = "rgba(0,0,0,0.1)";
     };
     deleteBtn.onmouseleave = () => {
-      deleteBtn.style.transform = "scale(1)";
+      deleteBtn.style.background = "transparent";
     };
 
     deleteBtn.onclick = async (e) => {
       e.stopPropagation();
-      await removeFavorite(idx);
-      await refresh();
+      e.preventDefault();
+      if (confirm("Remove this chat?")) {
+        await removeFavorite(idx);
+        updateSaveButton();
+        await refresh();
+      }
     };
 
-    li.append(link, deleteBtn);
+    const ts = createEl("div", {
+      text: f.savedAt ? new Date(f.savedAt).toLocaleString() : "unknown date",
+      style: {
+        fontSize: "11px",
+        opacity: "0.6",
+        marginTop: "2px",
+      },
+    });
+
+    titleRow.append(link, deleteBtn);
+    li.append(titleRow, ts);
+
+    // Make entire list item clickable
+    li.onclick = (e) => {
+      if (e.target !== deleteBtn && !deleteBtn.contains(e.target)) {
+        window.open(f.url, "_blank");
+      }
+    };
+
     return li;
   }
 
   function show() {
     refresh();
-    panel.style.display = "block";
+    panel.style.display = "flex"; // Changed to flex
     requestAnimationFrame(() => {
       panel.style.opacity = "1";
       panel.style.transform = "translateY(0)";
     });
   }
+
   function hide() {
     panel.style.opacity = "0";
     panel.style.transform = "translateY(20px)";
-    setTimeout(() => (panel.style.display = "none"), 250);
+    setTimeout(() => {
+      panel.style.display = "none";
+    }, 350);
   }
 
-  logo.onclick = () => (panel.style.display === "none" ? show() : hide());
+  logo.onclick = () => {
+    if (panel.style.display === "none" || panel.style.display === "") {
+      show();
+    } else {
+      hide();
+    }
+  };
+
   document.addEventListener("click", (e) => {
     if (
-      panel.style.display === "block" &&
+      panel.style.display !== "none" &&
       !panel.contains(e.target) &&
       e.target !== logo
-    )
+    ) {
       hide();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") hide();
+    }
   });
 
-  panel.addEventListener("scroll", () => {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && panel.style.display !== "none") {
+      hide();
+    }
+  });
+
+  // Fix scroll event listener
+  list.addEventListener("scroll", () => {
     const nearBottom =
-      panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 100;
+      list.scrollTop + list.clientHeight >= list.scrollHeight - 50;
     if (nearBottom && state.renderedCount < state.filteredFavorites.length) {
       renderList(false);
     }
   });
+
+  // Initial button state
+  updateSaveButton();
 }

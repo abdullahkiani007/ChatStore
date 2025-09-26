@@ -33,7 +33,10 @@ export function nextBatch() {
 export async function saveCurrentChat(title, url) {
   const favorites = await getFavorites();
   if (!favorites.some((f) => f.url === url)) {
-    favorites.push({ title, url });
+    let date = new Date();
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    date = date.toISOString().slice(0, 16).replace("T", " ");
+    favorites.push({ title, url, date });
     await saveFavorites(favorites);
     return true;
   }

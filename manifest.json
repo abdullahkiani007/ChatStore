@@ -1,13 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Chat Store",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Save and open your favorite chat links quickly.",
   "action": {
     "default_icon": { "16": "icons/icon.png" }
   },
   "permissions": ["storage", "tabs"],
-  "host_permissions": ["*://chatgpt.com/*", "*://chat.openai.com/*"],
+  "host_permissions": [
+    "*://chatgpt.com/*",
+    "*://chat.openai.com/*",
+    "*://gemini.google.com/*",
+    "*://chat.deepseek.com/*",
+    "*://claude.ai/*"
+  ],
   "web_accessible_resources": [
     {
       "resources": ["icons/delete.png", "ui/*"],
@@ -22,9 +28,15 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://chatgpt.com/*", "*://chat.openai.com/*"],
+      "matches": [
+        "*://chatgpt.com/*",
+        "*://chat.openai.com/*",
+        "*://gemini.google.com/*",
+        "*://chat.deepseek.com/*",
+        "*://claude.ai/*"
+      ],
       "js": ["content.js"],
-      "run_at": "document_start"
+      "run_at": "document_end"
     }
   ]
 }

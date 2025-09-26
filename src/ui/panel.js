@@ -305,19 +305,20 @@ export function initPanel() {
       },
     });
 
-    const deleteBtn = createEl("button", {
-      text: "🗑",
+    const deleteBtn = createEl("img", {
+      attrs: {
+        src: deleteIcon,
+        alt: "Delete",
+        title: "Remove chat",
+      },
       style: {
-        marginLeft: "8px",
-        background: "transparent",
-        border: "none",
+        width: "17px",
+        height: "17px",
         cursor: "pointer",
-        fontSize: "14px",
-        color: theme.text,
         flexShrink: "0",
-        padding: "4px",
-        borderRadius: "4px",
-        transition: "background 0.2s",
+        display: "block",
+        margin: "0 auto",
+        transition: "transform 0.15s ease",
       },
     });
 
@@ -338,9 +339,10 @@ export function initPanel() {
         await refresh();
       }
     };
+    console.log("date created", f);
 
     const ts = createEl("div", {
-      text: f.savedAt ? new Date(f.savedAt).toLocaleString() : "unknown date",
+      text: f.date ? new Date(f.date).toLocaleString() : "unknown date",
       style: {
         fontSize: "11px",
         opacity: "0.6",
@@ -351,6 +353,18 @@ export function initPanel() {
     titleRow.append(link, deleteBtn);
     li.append(titleRow, ts);
 
+    // Replace the existing li.onmouseenter with:
+    li.onmouseenter = () => {
+      li.style.borderLeft = "4px solid white"; // Thinner white line on the left
+      li.style.paddingLeft = "8px"; // Adjust padding to compensate for border
+      li.style.background = "rgba(0,0,0,0.05)"; // Keep the background effect
+    };
+
+    li.onmouseleave = () => {
+      li.style.borderLeft = "none";
+      li.style.paddingLeft = "12px"; // Reset to original padding
+      li.style.background = "transparent";
+    };
     // Make entire list item clickable
     li.onclick = (e) => {
       if (e.target !== deleteBtn && !deleteBtn.contains(e.target)) {
